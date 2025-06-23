@@ -29,6 +29,7 @@ class Agame:
         self.tangos = pygame.sprite.Group()
         self.tangos.add(Tango(self))
 
+
     def run(self):
         while True:
             if self.state == 'menu':
@@ -179,6 +180,7 @@ class Agame:
             self.clock.tick(60)
 
     def handle_alfa(self):
+        self.alfa.move()
         self.alfa.draw()
 
     def handle_tangos(self):
@@ -226,9 +228,9 @@ class Agame:
                 elif e.key == pygame.K_SPACE:
                     self.fire()
                 elif e.key == pygame.K_RIGHT:
-                    self.alfa.moving = 10
+                    self.alfa.moving = 30
                 elif e.key == pygame.K_LEFT:
-                    self.alfa.moving = -10
+                    self.alfa.moving = -30
             # zwolniiony klawisz
             elif e.type == pygame.KEYUP:
                 if e.key == pygame.K_RIGHT or e.key == pygame.K_LEFT:
@@ -247,13 +249,30 @@ class Agame:
 
     def fire(self):
         self.bullets.add(Bullet(self))
+        try:
+            pygame.mixer.Sound('362482__jalastram__shooting_sounds_020.wav').play()
+        except:
+            pass
 
     def handle_los(self):
         self.lives -= 1
-        if self.lives == 0:
+        hit_text = self.font.render("-1", True, (255, 0, 0))
+        self.board.blit(hit_text, (self.alfa.rect.centerx, self.alfa.rect.top - 30))
+        pygame.display.flip()
+        pygame.time.delay(500)
+
+        if self.lives <= 0:
             self.pause('LOS')
         else:
-            self.pause('HIT')
+            self.bullets.empty()
+            self.tangos.empty()
+            self.tangos.add(Tango(self))
+
+        # self.lives -= 1
+        # if self.lives == 0:
+        #     self.pause('LOS')
+        # else:
+        #     self.pause('HIT')
 
     def pause(self, case):
         text = ''
@@ -271,10 +290,10 @@ class Agame:
                 text = self.font.render('  N  - New Game', True, 'green')
                 self.board.blit(text, dest=(0, 30))
             elif case == 'LOS':
-                text = self.font.render('Game Over. You lost!', True, 'green')
-                self.board.blit(text, dest=(0, 0))
+                text = self.font.render('Game Over. You lost!', True, 'red')
+                self.board.blit(text, (self.board.get_width()//2 - 135, self.board.get_height()//2 - 50))
                 text = self.font.render('  N  - New Game', True, 'green')
-                self.board.blit(text, dest=(0, 30))
+                self.board.blit(text, (self.board.get_width()//2 - 100, self.board.get_height()//2 + 10))
             elif case == 'HIT':
                 text = self.font.render('You lost 1 life...', True, 'red')
                 self.board.blit(text, dest=(0, 0))
@@ -284,7 +303,7 @@ class Agame:
             # text = self.font.render('  N  - New Game', True, 'green')
             # self.board.blit(text, dest=(0, 30))
         text = self.font.render('  Q  - Quit', True, 'green')
-        self.board.blit(text, dest=(0, 60))
+        self.board.blit(text, (self.board.get_width()//2 - 100, self.board.get_height()//2 + 40))
 
         pygame.display.flip()
         # oczekiwanie na decyzję gracza
@@ -341,13 +360,37 @@ class Alfa(Soldier):
         super().__init__(game, (0,0,255))
         # początkowo stoi w miejscu
         self.moving = 0
-        # początkowe ustawienie pośrodku dołu planszy
+
+        try:
+            import os
+            image_path = os.path.join(os.path.dirname(__file__), 'DurrrSpaceShip.png')
+            self.image = pygame.image.load(image_path).convert_alpha()
+            self.image = pygame.transform.scale(self.image, (40, 60))  # Dostosuj rozmiar
+            self.rect = self.image.get_rect()
+        except Exception as e:
+            print(f"Nie można załadować obrazka: {e}")
+            self.image = None
+            self.rect = pygame.Rect(0, 0, 40, 60)
+
         self.rect.midbottom = self.game.board.get_rect().midbottom
 
+    def draw(self):
+        if self.image:
+            # Rysowanie obrazka
+            self.game.board.blit(self.image, self.rect)
+        else:
+            # Rysowanie prostokąta (fallback)
+            pygame.draw.rect(self.game.board, self.color, self.rect, 5)
+
     def move(self):
-        super().move()
-        # zmiana pozycji wg moving w osi X
         self.rect.move_ip(self.moving, 0)
+        self.rect.left = max(0, self.rect.left)
+        self.rect.right = min(self.game.board.get_width(), self.rect.right)
+
+    # def move(self):
+    #     super().move()
+    #     # zmiana pozycji wg moving w osi X
+    #     self.rect.move_ip(self.moving, 0)
 
 # wróg
 class Tango(Soldier):
@@ -355,6 +398,14 @@ class Tango(Soldier):
         super().__init__(game, (255, 0, 0))
         # początkowe ustawienie pośrodku góry planszy
         # self.rect.midtop = self.game.board.get_rect().midtop
+        #
+        # try:
+        #     self.image = pygame.image.load('Asteroid-A-09-093.png').convert_alpha()
+        #     self.rect = self.image.get_rect()
+        # except:
+        #     self.image = None
+        #     self.rect = pygame.Rect(0, 0, 20, 40)
+
         self.rect.y = 0
         self.rect.x = 50 * randint(2, 23)
 
