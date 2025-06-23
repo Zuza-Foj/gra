@@ -9,9 +9,9 @@ class Agame:
         pygame.init()
         pygame.display.set_caption('a Game')
         # parametry gry
-        self.max_tangos = 3
-        self.max_lives = 2
-        self.new_tango_interval = 10
+        self.max_tangos = 2
+        self.max_lives = 5
+        self.new_tango_interval = 30
         # elementy gry
         self.board = pygame.display.set_mode((1200, 800))
         self.clock = pygame.time.Clock()
@@ -36,8 +36,8 @@ class Agame:
             elif self.state == 'about':
                 self.show_about()
             elif self.state == 'score':
-                self.state = 'menu'
-            #     self.show_score()
+                # self.state = 'menu'
+                self.show_score()
             elif self.state == 'rules':
                 self.show_rules()
             elif self.state == 'game':
@@ -126,7 +126,7 @@ class Agame:
             title = self.font.render('A Game - RULES', True, (255, 255, 255))
             self.board.blit(title, (450, 150))
             rules = ["1. Press spacebar to shoot.",
-                     "2. Try to hit enemies falling from above to gain points.",
+                     "2. Try to hit enemies falling from above to gain points by pressing the spacebar.",
                      "3. Don't let the enemies touch the ground or you.",
                      "Press ESC to return to the menu."]
 
@@ -145,7 +145,38 @@ class Agame:
 
             self.clock.tick(60)
 
+    def show_score(self):
+        while self.state == 'score':
+            self.board.fill((0, 0, 40))
+            title = self.font.render('A Game - SCORE', True, (255, 255, 255))
+            self.board.blit(title, (450, 150))
 
+            try:
+                with open('your_best_score.txt', 'r') as file:
+                    high_score = file.read().strip()
+            except FileNotFoundError:
+                score = "0"
+
+            current_score_record = self.font.render(f"Your current score is: {self.score}", True, (255, 255, 255))
+            best_score_record = self.font.render(f"All-time high score: {high_score}", True, (255, 255, 0))
+
+            self.board.blit(current_score_record, (450, 300))
+            self.board.blit(best_score_record, (450, 350))
+
+            # text = f"Your best score is {score}."
+            # rendered = self.font.render(text, True, (255, 255, 255))
+            # self.board.blit(rendered, (450, 400))
+
+            pygame.display.flip()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        self.state = 'menu'
+
+            self.clock.tick(60)
 
     def handle_alfa(self):
         self.alfa.draw()
@@ -182,11 +213,14 @@ class Agame:
     def handle_events(self):
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
+                self.save_high_score()
                 sys.exit()
             # naciśnięty klawisz
             elif e.type == pygame.KEYDOWN:
                 if e.key == pygame.K_q:
+                    self.save_high_score()
                     sys.exit()
+
                 elif e.key == pygame.K_ESCAPE:
                     self.pause('ESC')
                 elif e.key == pygame.K_SPACE:
@@ -200,6 +234,17 @@ class Agame:
                 if e.key == pygame.K_RIGHT or e.key == pygame.K_LEFT:
                     self.alfa.moving = 0
 
+    def save_high_score(self):
+        try:
+            with open('your_best_score.txt', 'r') as file:
+                best_score = int(file.read().strip())
+        except (FileNotFoundError, ValueError):
+            best_score = 0
+
+        if self.score > best_score:
+            with open('your_best_score.txt', 'w') as file:
+                file.write(str(self.score))
+
     def fire(self):
         self.bullets.add(Bullet(self))
 
@@ -212,6 +257,8 @@ class Agame:
 
     def pause(self, case):
         text = ''
+        if case in ('WIN', 'LOS'):
+            self.save_high_score()
         if case == 'ESC':
             text = self.font.render('Game Paused', True, 'green')
             self.board.blit(text, dest=(0, 0))
