@@ -132,6 +132,7 @@ class Agame:
                      "3. Don't let the enemies touch the ground or you.",
                      "Press ESC to return to the menu."]
 
+
             for i, line in enumerate(rules):
                 rendered = self.font.render(line, True, (255, 255, 255))
                 self.board.blit(rendered, (300, 250 + i * 40))
