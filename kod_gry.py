@@ -127,7 +127,8 @@ class Agame:
             title = self.font.render('A Game - RULES', True, (255, 255, 255))
             self.board.blit(title, (450, 150))
             rules = ["1. Press spacebar to shoot.",
-                     "2. Try to hit enemies falling from above to gain points by pressing the spacebar.",
+                     "2. Try to hit enemies falling from above to gain",
+                     "points by pressing the spacebar.",
                      "3. Don't let the enemies touch the ground or you.",
                      "Press ESC to return to the menu."]
 
@@ -397,23 +398,40 @@ class Tango(Soldier):
     def __init__(self, game: Agame):
         super().__init__(game, (255, 0, 0))
         # początkowe ustawienie pośrodku góry planszy
-        # self.rect.midtop = self.game.board.get_rect().midtop
+        self.rect.midtop = self.game.board.get_rect().midtop
         #
         # try:
-        #     self.image = pygame.image.load('Asteroid-A-09-093.png').convert_alpha()
+        #     import os
+        #     image_path = os.path.join(os.path.dirname(__file__), 'Layered Rock_0.png')
+        #     self.image = pygame.image.load(image_path).convert_alpha()
+        #     self.image = pygame.transform.scale(self.image, (40, 60))  # Dostosuj rozmiar
         #     self.rect = self.image.get_rect()
+        #
+        #     self.rect.y = 0
+        #     self.rect.x = 50 * randint(2, 23)
+        #
         # except:
         #     self.image = None
         #     self.rect = pygame.Rect(0, 0, 20, 40)
+        #
+        #     self.rect.y = 0
+        #     self.rect.x = 50 * randint(2, 23)
 
-        self.rect.y = 0
-        self.rect.x = 50 * randint(2, 23)
+    # def draw(self):
+    #     if self.image:
+    #         # rysowanie obrazka
+    #         self.game.board.blit(self.image, self.rect)
+    #     else:
+    #         # gdyby nie było obrazka
+    #         pygame.draw.rect(self.game.board, self.color, self.rect, 5)
 
     def move(self):
-        super().move()
+        # self.rect.move_ip(self.moving, 0)
         # losowa zmiana pozycji
         x = 10 * randint(-1, 1)
         self.rect.move_ip(x, 10)
+        # y = 10
+        # self.rect.move_ip(x, y)
 
 # pocisk
 class Bullet(Sprite):
