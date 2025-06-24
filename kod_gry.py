@@ -132,7 +132,6 @@ class Agame:
                      "3. Don't let the enemies touch the ground or you.",
                      "Press ESC to return to the menu."]
 
-
             for i, line in enumerate(rules):
                 rendered = self.font.render(line, True, (255, 255, 255))
                 self.board.blit(rendered, (300, 250 + i * 40))
@@ -165,10 +164,6 @@ class Agame:
 
             self.board.blit(current_score_record, (450, 300))
             self.board.blit(best_score_record, (450, 350))
-
-            # text = f"Your best score is {score}."
-            # rendered = self.font.render(text, True, (255, 255, 255))
-            # self.board.blit(rendered, (450, 400))
 
             pygame.display.flip()
 
@@ -270,12 +265,6 @@ class Agame:
             self.tangos.empty()
             self.tangos.add(Tango(self))
 
-        # self.lives -= 1
-        # if self.lives == 0:
-        #     self.pause('LOS')
-        # else:
-        #     self.pause('HIT')
-
     def pause(self, case):
         text = ''
         if case in ('WIN', 'LOS'):
@@ -301,9 +290,6 @@ class Agame:
                 self.board.blit(text, dest=(0, 0))
                 text = self.font.render('  R  - Resume', True, 'green')
                 self.board.blit(text, dest=(0, 30))
-            # self.board.blit(text, dest=(0, 0))
-            # text = self.font.render('  N  - New Game', True, 'green')
-            # self.board.blit(text, dest=(0, 30))
         text = self.font.render('  Q  - Quit', True, 'green')
         self.board.blit(text, (self.board.get_width()//2 - 100, self.board.get_height()//2 + 40))
 
@@ -388,11 +374,6 @@ class Alfa(Soldier):
         self.rect.move_ip(self.moving, 0)
         self.rect.left = max(0, self.rect.left)
         self.rect.right = min(self.game.board.get_width(), self.rect.right)
-
-    # def move(self):
-    #     super().move()
-    #     # zmiana pozycji wg moving w osi X
-    #     self.rect.move_ip(self.moving, 0)
 
 # wróg
 class Tango(Soldier):
