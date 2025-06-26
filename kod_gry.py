@@ -7,7 +7,7 @@ from random import randint
 class Agame:
     def __init__(self):
         pygame.init()
-        pygame.display.set_caption('a Game')
+        pygame.display.set_caption('Asteroid Blast')
         # parametry gry
         self.max_tangos = 2
         self.max_lives = 5
@@ -100,7 +100,7 @@ class Agame:
     def show_about(self):
         while self.state == 'about':
             self.board.fill((0, 0, 40))
-            title = self.font.render('A Game - ABOUT', True, (255, 255, 255))
+            title = self.font.render('Asteroid Blast - ABOUT', True, (255, 255, 255))
             self.board.blit(title, (450, 150))
             lines = ["This is a game created by Zuza",
             "in Python using the PyGame library.",
@@ -108,7 +108,7 @@ class Agame:
             "Press ESC to return to the menu."]
             for i, line in enumerate(lines):
                 rendered = self.font.render(line, True, (255, 255, 255))
-                self.board.blit(rendered, (300, 250 + i * 40))
+                self.board.blit(rendered, (400, 250 + i * 40))
 
             pygame.display.flip()
 
@@ -124,7 +124,7 @@ class Agame:
     def show_rules(self):
         while self.state == 'rules':
             self.board.fill((0, 0, 40))
-            title = self.font.render('A Game - RULES', True, (255, 255, 255))
+            title = self.font.render('Asteroid Blast - RULES', True, (255, 255, 255))
             self.board.blit(title, (450, 150))
             rules = ["1. Press spacebar to shoot.",
                      "2. Try to hit enemies falling from above to gain",
@@ -134,7 +134,7 @@ class Agame:
 
             for i, line in enumerate(rules):
                 rendered = self.font.render(line, True, (255, 255, 255))
-                self.board.blit(rendered, (300, 250 + i * 40))
+                self.board.blit(rendered, (400, 250 + i * 40))
 
             pygame.display.flip()
 
@@ -150,7 +150,7 @@ class Agame:
     def show_score(self):
         while self.state == 'score':
             self.board.fill((0, 0, 40))
-            title = self.font.render('A Game - SCORE', True, (255, 255, 255))
+            title = self.font.render('Asteroid Blast - SCORE', True, (255, 255, 255))
             self.board.blit(title, (450, 150))
 
             try:
@@ -181,7 +181,9 @@ class Agame:
         self.alfa.draw()
 
     def handle_tangos(self):
-        for t in self.tangos.sprites(): t.draw()
+        for t in self.tangos.sprites():
+            t.move()
+            t.draw()
         # sprawdzenie kolizji ze strzelcem
         if pygame.sprite.spritecollideany(self.alfa, self.tangos):
             self.handle_los()
@@ -202,6 +204,8 @@ class Agame:
         hits = pygame.sprite.groupcollide(self.bullets, self.tangos, True, True)
         if hits:
             self.score += 1
+            if self.score % 10 == 0:
+                self.max_tangos += 1
             if len(self.tangos) == 0:
                 self.pause('WIN')
 
@@ -271,9 +275,9 @@ class Agame:
             self.save_high_score()
         if case == 'ESC':
             text = self.font.render('Game Paused', True, 'green')
-            self.board.blit(text, dest=(0, 0))
+            self.board.blit(text, (self.board.get_width()//2 - 100, self.board.get_height()//2 - 50))
             text = self.font.render('  C - Continue', True, 'green')
-            self.board.blit(text, dest=(0, 30))
+            self.board.blit(text, (self.board.get_width()//2 - 100, self.board.get_height()//2 + 10))
         else:
             if case == 'WIN':
                 text = self.font.render('Game Over. You won!', True, 'green')
@@ -353,7 +357,7 @@ class Alfa(Soldier):
             import os
             image_path = os.path.join(os.path.dirname(__file__), 'DurrrSpaceShip.png')
             self.image = pygame.image.load(image_path).convert_alpha()
-            self.image = pygame.transform.scale(self.image, (40, 60))  # Dostosuj rozmiar
+            self.image = pygame.transform.scale(self.image, (40, 60))  # dostosuj rozmiar
             self.rect = self.image.get_rect()
         except Exception as e:
             print(f"Nie można załadować obrazka: {e}")
@@ -364,10 +368,10 @@ class Alfa(Soldier):
 
     def draw(self):
         if self.image:
-            # Rysowanie obrazka
+            # rysowanie obrazka
             self.game.board.blit(self.image, self.rect)
         else:
-            # Rysowanie prostokąta (fallback)
+            # rysowanie prostokąta (fallback)
             pygame.draw.rect(self.game.board, self.color, self.rect, 5)
 
     def move(self):
@@ -381,31 +385,28 @@ class Tango(Soldier):
         super().__init__(game, (255, 0, 0))
         # początkowe ustawienie pośrodku góry planszy
         self.rect.midtop = self.game.board.get_rect().midtop
-        #
-        # try:
-        #     import os
-        #     image_path = os.path.join(os.path.dirname(__file__), 'Layered Rock_0.png')
-        #     self.image = pygame.image.load(image_path).convert_alpha()
-        #     self.image = pygame.transform.scale(self.image, (40, 60))  # Dostosuj rozmiar
-        #     self.rect = self.image.get_rect()
-        #
-        #     self.rect.y = 0
-        #     self.rect.x = 50 * randint(2, 23)
-        #
-        # except:
-        #     self.image = None
-        #     self.rect = pygame.Rect(0, 0, 20, 40)
-        #
-        #     self.rect.y = 0
-        #     self.rect.x = 50 * randint(2, 23)
 
-    # def draw(self):
-    #     if self.image:
-    #         # rysowanie obrazka
-    #         self.game.board.blit(self.image, self.rect)
-    #     else:
-    #         # gdyby nie było obrazka
-    #         pygame.draw.rect(self.game.board, self.color, self.rect, 5)
+        try:
+            import os
+            image_path = os.path.join(os.path.dirname(__file__), 'Layered Rock_0.png')
+            self.image = pygame.image.load(image_path).convert_alpha()
+            self.image = pygame.transform.scale(self.image, (40, 60))  # dostosuj rozmiar
+            self.rect = self.image.get_rect()
+        except:
+            self.image = None
+            self.rect = pygame.Rect(0, 0, 20, 40)
+
+        self.rect.y = 0
+        # self.rect.x = 50 * randint(2, 23)
+        self.rect.x = randint(0, game.board.get_width() - self.rect.width)
+
+    def draw(self):
+        if self.image:
+            # rysowanie obrazka
+            self.game.board.blit(self.image, self.rect)
+        else:
+            # gdyby nie było obrazka
+            pygame.draw.rect(self.game.board, self.color, self.rect, 5)
 
     def move(self):
         # self.rect.move_ip(self.moving, 0)
@@ -414,6 +415,8 @@ class Tango(Soldier):
         self.rect.move_ip(x, 10)
         # y = 10
         # self.rect.move_ip(x, y)
+        self.rect.left = max(0, self.rect.left)
+        self.rect.right = min(self.game.board.get_width(), self.rect.right)
 
 # pocisk
 class Bullet(Sprite):
